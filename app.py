@@ -3,7 +3,7 @@ import os
 from PIL import Image, ImageOps
 #from streamlit_image_select import image_select
 #from streamlit_imagegrid import streamlit_imagegrid
-from stqdm import stqdm
+#from stqdm import stqdm
 import math
 import openpyxl
 from openpyxl.drawing.image import Image
@@ -88,7 +88,7 @@ if choice_value == "1 Carga de Acta y Fotografías":
             def rotate_image(image, rotation):
                 return image.rotate(rotation, expand=True)
             
-            for i in stqdm(range(num_rows)):
+            for i in (range(num_rows)):
                 cols = st.columns(num_columns)
                 for j in range(num_columns):
                     index = i * num_columns + j
