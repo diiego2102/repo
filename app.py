@@ -3,7 +3,6 @@ import os
 from PIL import Image, ImageOps
 #from streamlit_image_select import image_select
 #from streamlit_imagegrid import streamlit_imagegrid
-#from stqdm import stqdm
 import math
 import openpyxl
 from openpyxl.drawing.image import Image
