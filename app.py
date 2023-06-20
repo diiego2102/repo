@@ -1,6 +1,7 @@
 import streamlit as st
 import os
-from PIL import Image, ImageOps
+from PIL import ImageOps
+from PIL import Image as PILImage
 #from streamlit_image_select import image_select
 #from streamlit_imagegrid import streamlit_imagegrid
 import math
@@ -37,7 +38,7 @@ if choice_value == "1 Carga de Acta y Fotografías":
         # Mostrar preview de la imagen y permitir al usuario ajustar la rotación
         if uploaded_file is not None:
             # Abrir imagen con Pillow
-            image = Image.open(uploaded_file)
+            image = PILImage.open(uploaded_file)
 
             # Rotar imagen según la orientación EXIF
             image = ImageOps.exif_transpose(image) 
@@ -105,7 +106,7 @@ if choice_value == "1 Carga de Acta y Fotografías":
             image_labels[index] = label_value
 
             st.sidebar.subheader("Antes")
-            selected_image_file = Image.open(selected_image)
+            selected_image_file = PILImage.open(selected_image)
 
             if st.sidebar.button("Rotar y guardar"):
                 st.sidebar.image(selected_image, use_column_width=True, caption=selected_image)
