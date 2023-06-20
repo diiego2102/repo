@@ -116,7 +116,7 @@ if choice_value == "1 Carga de Acta y Fotografías":
                 image_extension = os.path.splitext(selected_image.name)[1]
                 # image_path = os.path.join("uploads", f"{label_value}{image_extension}")
                 image_path = os.path.join(f'{suministro_selection}_output', f"{label_value}{image_extension}")
-                os.makedirs(f'D:\{suministro_selection}_output',exist_ok=True)
+                os.makedirs(f'D:\Actas_Fotograficas\{suministro_selection}_output',exist_ok=True)
                 rotated_image.save(image_path)
                 st.sidebar.success(f"Imagen rotada guardada como {image_path}")
 
