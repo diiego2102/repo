@@ -115,10 +115,12 @@ if choice_value == "1 Carga de Acta y Fotografías":
                 st.sidebar.image(rotated_image, use_column_width=True, caption=selected_image)
                 image_extension = os.path.splitext(selected_image.name)[1]
                 # image_path = os.path.join("uploads", f"{label_value}{image_extension}")
-                image_path = os.path.join(f'D:\Actas_Fotograficas\{suministro_selection}_output', f"{label_value}{image_extension}")
-                os.makedirs(f'D:\Actas_Fotograficas\{suministro_selection}_output',exist_ok=True)
+                #image_path = os.path.join(f'D:\Actas_Fotograficas\{suministro_selection}_output', f"{label_value}{image_extension}")
+                #os.makedirs(f'D:\Actas_Fotograficas\{suministro_selection}_output',exist_ok=True)
+                img_bytes = rotated_image.tobytes()
+                st.download_button(label='Download Image', data=img_bytes, file_name=f"{label_value}{image_extension}", mime='image/jpeg')
                 rotated_image.save(image_path)
-                st.sidebar.success(f"Imagen rotada guardada como {image_path}")
+                st.sidebar.success(f"Imagen rotada guardada como {label_value}{image_extension}")
 
 
         # Display image labels
