@@ -76,7 +76,7 @@ if choice_value == "1 Carga de Acta y Fotografías":
                 pass
     elif carga_box == carga_options[1]:
         image_labels = {}
-        label_options = ['1_MEDIDOR INTERVENIDO','2_CONEXIÓN DIR. EN BORNERA','3_SERVICIO CORTADO','4_FASE R','5_FASE S','6_FASE T','7_VIVIENDA','8_OTROS']
+        label_options = ['1_MEDIDOR INTERVENIDO','2_AGREGAR CAUSALIDAD','3_SERVICIO CORTADO','4_FASE R','5_FASE S','6_FASE T','7_VIVIENDA','8_OTROS']
         uploaded_images = st.file_uploader("Cargar las imagenes de la Intervención", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
         if uploaded_images is not None:
             num_columns = 3
@@ -101,9 +101,18 @@ if choice_value == "1 Carga de Acta y Fotografías":
             selected_image = uploaded_images[selected_index]
             rotation = st.sidebar.selectbox("Rota la imagen:", rotation_options, index=0)
             # Add labels for the uploaded images
+            #label_key = f"label_{index}"
+            #label_value = st.sidebar.selectbox("Selecciona label:", label_options, key=label_key)
+            #image_labels[index] = label_value
+
+            # Add labels for the uploaded images
             label_key = f"label_{index}"
             label_value = st.sidebar.selectbox("Selecciona label:", label_options, key=label_key)
-            image_labels[index] = label_value
+            if index == 1:
+                label_value = st.sidebar.text_input('Ingresa la causalidad:')
+                label_value = fr'2_{label_value}'
+            else:
+                image_labels[index] = label_value
 
             st.sidebar.subheader("Antes")
             selected_image_file = PILImage.open(selected_image)
@@ -121,7 +130,7 @@ if choice_value == "1 Carga de Acta y Fotografías":
                 img_bytes = io.BytesIO()
                 rotated_image.save(img_bytes, format='JPEG')
                 img_bytes = img_bytes.getvalue()
-                st.sidebar.download_button(label='Descargar Imagen', data=img_bytes, file_name=f"{label_value}{image_extension}", mime='image/jpeg')
+                st.sidebar.download_button(label='Descargar Imagen', data=img_bytes, file_name=f"{label_value}_S{suministro_selection}{image_extension}", mime='image/jpeg')
                 #rotated_image.save(image_path)
                 st.sidebar.success(f"Imagen rotada guardada como {label_value}{image_extension}")
 
@@ -180,7 +189,7 @@ if choice_value == "1 Carga de Acta y Fotografías":
                 ws.add_image(img,cell)
             
             for img_path, cell_name in zip(image_paths,cells_name):
-                name = os.path.basename(img_path).split('_')[1].split('.')[0]
+                name = os.path.basename(img_path).split('_')[1] #.split('.')[0]
                 ws[cell_name] = name
                 ws[cell_name].alignment = Alignment(horizontal='center', vertical='center')
         
@@ -230,7 +239,7 @@ if choice_value == "1 Carga de Acta y Fotografías":
                 ws.add_image(img,cell)
             
             for img_path, cell_name in zip(image_paths,cells_name):
-                name = os.path.basename(img_path).split('_')[1].split('.')[0]
+                name = os.path.basename(img_path).split('_')[1] #.split('.')[0]
                 ws[cell_name] = name
                 ws[cell_name].alignment = Alignment(horizontal='center', vertical='center')
         else:
