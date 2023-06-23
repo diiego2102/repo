@@ -61,15 +61,19 @@ if choice_value == "1 Carga de Acta y Fotografías":
                 image_ref = f'Acta de intervención sum. {suministro_selection}'
                 filename = f"{image_ref}{'.jpeg'}"
                 if st.button("Guardar Acta de Intervención"):
-                    i = 1
-                    while os.path.exists(os.path.join("uploads", filename)):
-                        filename = f"{os.path.splitext(filename)[0]}_{i}{os.path.splitext(filename)[1]}"
-                        i += 1
+                   # i = 1
+                   # while os.path.exists(os.path.join("uploads", filename)):
+                        #filename = f"{os.path.splitext(filename)[0]}_{i}{os.path.splitext(filename)[1]}"
+                       # i += 1
 
                 # Guardar imagen con el nombre especificado
-                    with open(os.path.join("uploads", filename), "wb") as f:
+                    #with open(os.path.join("uploads", filename), "wb") as f:
                         # f.write(uploaded_file.getbuffer())
-                        rot_image.save(f)
+                        img_bytes = io.BytesIO()
+                        rot_image.save(img_bytes, format='JPEG')
+                        img_bytes = img_bytes.getvalue()
+                        st.sidebar.download_button(label='Descargar Acta', data=img_bytes, file_name=f"{filename}", mime='image/jpeg')
+                        #rot_image.save(f)
                         st.write("Imagen Guardada")
                     # os.rename(os.path.join("uploads", uploaded_file.name), os.path.join("uploads", filename))                    
             else:
