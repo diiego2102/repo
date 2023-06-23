@@ -101,18 +101,18 @@ if choice_value == "1 Carga de Acta y Fotografías":
             selected_image = uploaded_images[selected_index]
             rotation = st.sidebar.selectbox("Rota la imagen:", rotation_options, index=0)
             # Add labels for the uploaded images
-            #label_key = f"label_{index}"
-            #label_value = st.sidebar.selectbox("Selecciona label:", label_options, key=label_key)
-            #image_labels[index] = label_value
-
-            # Add labels for the uploaded images
             label_key = f"label_{index}"
             label_value = st.sidebar.selectbox("Selecciona label:", label_options, key=label_key)
-            if index == 1:
-                label_value = st.sidebar.text_input('Ingresa la causalidad:')
-                label_value = fr'2_{label_value}'
-            else:
-                image_labels[index] = label_value
+            image_labels[index] = label_value
+
+            # Add labels for the uploaded images
+            #label_key = f"label_{index}"
+            #label_value = st.sidebar.selectbox("Selecciona label:", label_options, key=label_key)
+            #if index == 1:
+                #label_value = st.sidebar.text_input('Ingresa la causalidad:')
+                #label_value = fr'2_{label_value}'
+            #else:
+                #image_labels[index] = label_value
 
             st.sidebar.subheader("Antes")
             selected_image_file = PILImage.open(selected_image)
