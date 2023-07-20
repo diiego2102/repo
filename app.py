@@ -5,6 +5,7 @@ from PIL import Image as PILImage
 #from streamlit_image_select import image_select
 #from streamlit_imagegrid import streamlit_imagegrid
 import math
+import re
 import openpyxl
 from openpyxl.drawing.image import Image
 from openpyxl.utils import get_column_letter
@@ -154,6 +155,15 @@ if choice_value == "1 Carga de Acta y Fotografías":
         ws.sheet_view.showGridLines = False
 
         uploaded_images = st.file_uploader("Cargar las imagenes de la Intervención", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
+        # Extraer el nombre de cada elemento de la lista utilizando una expresión regular
+        regex = r"name='(.+)'"
+        lista_nombres = [re.search(regex, x).group(1) for x in uploaded_images]
+        # Crear una lista de diccionarios con los nombres y los elementos originales
+        lista_diccionarios = [{'nombre': nombre, 'elemento': elemento} for nombre, elemento in zip(lista_nombres, lista_archivos)]
+        # Ordenar la lista de diccionarios con respecto al nombre
+        lista_diccionarios.sort(key=lambda x: x['nombre'])
+        # Imprimir la lista ordenada
+        uploaded_images = [x['elemento'] for x in lista_diccionarios]
         st.write(uploaded_images)
         if uploaded_images is not None:
             num_columns = 3
