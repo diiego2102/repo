@@ -163,7 +163,7 @@ if choice_value == "1 Carga de Acta y Fotografías":
         image_paths = []
         for uploaded_file in uploaded_images:
                 image_paths.append(uploaded_file.name)
-
+        st.write(image_paths)
         if selected_index <=6:
             cells = ['A1','E1','I1','A17','E17','I17']
             cells_name = ['A15','E15','I15','A32','E32','I32']
