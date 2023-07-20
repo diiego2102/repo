@@ -154,6 +154,7 @@ if choice_value == "1 Carga de Acta y Fotografías":
         ws.sheet_view.showGridLines = False
 
         uploaded_images = st.file_uploader("Cargar las imagenes de la Intervención", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
+        uploaded_images.sort()
         if uploaded_images is not None:
             num_columns = 3
             num_images = len(uploaded_images)
