@@ -159,7 +159,7 @@ if choice_value == "1 Carga de Acta y Fotografías":
         regex = r"name='(.+)'"
         lista_nombres = [re.search(regex, x).group(1) for x in uploaded_images]
         # Crear una lista de diccionarios con los nombres y los elementos originales
-        lista_diccionarios = [{'nombre': nombre, 'elemento': elemento} for nombre, elemento in zip(lista_nombres, lista_archivos)]
+        lista_diccionarios = [{'nombre': nombre, 'elemento': elemento} for nombre, elemento in zip(lista_nombres, uploaded_images)]
         # Ordenar la lista de diccionarios con respecto al nombre
         lista_diccionarios.sort(key=lambda x: x['nombre'])
         # Imprimir la lista ordenada
