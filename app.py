@@ -168,6 +168,7 @@ if choice_value == "1 Carga de Acta y Fotografías":
             # Ordenar las imágenes por nombre de archivo
             sorted_images = sorted(uploaded_images, key=lambda image: image.name)
         st.write(uploaded_images)
+        st.write(sorted_images)
         if uploaded_images is not None:
             num_columns = 3
             num_images = len(uploaded_images)
