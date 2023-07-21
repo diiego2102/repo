@@ -166,7 +166,7 @@ if choice_value == "1 Carga de Acta y Fotografías":
         #uploaded_images = [x['elemento'] for x in lista_diccionarios]
         if uploaded_images:
             # Ordenar las imágenes por nombre de archivo
-            sorted_images = sorted(uploaded_images, key=lambda image: image.name)
+            uploaded_images = sorted(uploaded_images, key=lambda image: image.name)
         st.write(uploaded_images)
         st.write(sorted_images)
         if uploaded_images is not None:
