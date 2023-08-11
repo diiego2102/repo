@@ -78,7 +78,7 @@ opt-einsum==3.3.0
 packaging==21.3
 paddle-bfloat==0.1.7
 paddlepaddle==2.4.1
-pandas==1.4.2
+pandas==2.0
 pandocfilters==1.5.0
 parso==0.8.3
 pdfminer.six==20191110
@@ -135,7 +135,7 @@ soupsieve==2.3.2.post1
 SpeechRecognition==3.8.1
 stack-data==0.2.0
 stqdm==0.0.5
-streamlit==1.23.1
+streamlit==1.24.1
 streamlit-aggrid==0.3.3
 streamlit-image-select==0.6.0
 streamlit-imagegrid==0.0.3
