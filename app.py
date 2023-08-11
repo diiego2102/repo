@@ -2,22 +2,26 @@ import streamlit as st
 import os
 from PIL import ImageOps
 from PIL import Image as PILImage
-#from streamlit_image_select import image_select
-#from streamlit_imagegrid import streamlit_imagegrid
+from office365.runtime.auth.authentication_context import AuthenticationContext
+from office365.runtime.auth.client_credential import ClientCredential
+from office365.runtime.auth.user_credential import UserCredential
+from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.files.file import File
 import math
-import re
 import openpyxl
 from openpyxl.drawing.image import Image
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
 from openpyxl.worksheet.pagebreak import Break
-import glob
+import glob 
 import os
 from datetime import datetime
 from datetime import date
 import io
 import pandas as pd
-
+import locale
+locale.setlocale(locale.LC_TIME, 'en_US.UTF-8')
+from funciones_sharepoint import * 
 # Cargar imagen
 st.set_page_config(page_title="Control Pérdidas - Valorizaciones APP", page_icon="calavera.jfif")
 st.title("Control Pérdidas - Valorizaciones APP")
@@ -26,6 +30,20 @@ suministro_selection = st.text_input("Ingrese Número de Suministro")
 choice = ["1 Carga de Acta y Fotografías"]
 choice_value = st.sidebar.selectbox("Seleccionar el proceso", choice)
 rot_image = None
+# Fechas de trabajo
+fecha_interv = st.date_input("Ingresa fecha de intervención")
+fecha_interv = fecha_interv.strftime('%Y-%m-%d')
+mes_aux = date.fromisoformat(fecha_interv).strftime('%B').replace(".","").capitalize()
+fecha_ruta = f'{date.fromisoformat(fecha_interv).year}/{int(date.fromisoformat(fecha_interv).month)} {mes_aux}/{int(date.fromisoformat(fecha_interv).day)}'
+#RUTA DE SHAREPOINT
+folder_valorizacion = f'{folder_url}/Valorizacion Excel/{fecha_ruta}'
+folder_fotos = f'{folder_url}/Actas Fotos/{fecha_ruta}'
+
+# Funcion rotacion
+def btn_rotate_image(img,degrees):
+    rotated_image = img.rotate(degrees, expand=True)
+    return rotated_image
+
 if choice_value == "1 Carga de Acta y Fotografías":
     st.title(choice[0])
 
@@ -34,49 +52,41 @@ if choice_value == "1 Carga de Acta y Fotografías":
     carga_box = st.radio("Tipo de Carga",carga_options)
 
     if carga_box == carga_options[0]:
+        if "rotated_image" not in st.session_state:
+            st.session_state["rotated_image"] = None
         uploaded_file = st.file_uploader("Cargar imagen de Acta de Intervención", type=["jpg", "jpeg", "png"])
         
         # Mostrar preview de la imagen y permitir al usuario ajustar la rotación
         if uploaded_file is not None:
             # Abrir imagen con Pillow
             image = PILImage.open(uploaded_file)
-
+            st.sidebar.subheader("Rota las imágenes")
             # Rotar imagen según la orientación EXIF
             image = ImageOps.exif_transpose(image) 
+            st.image(image, caption="Imagen original", use_column_width=True)
 
-            # Mostrar preview de la imagen
-            rotation_options = [-180, -90, 0, 90, 180]
-            rotation = st.sidebar.radio("Rota la imagen:", rotation_options, index=2)
-            st.image(image.rotate(rotation), caption="Preview de la imagen")
-            rot_image = image.rotate(rotation)
-            if st.button("Rotar Imagen"):
-                rot_image = image.rotate(rotation)
-                # rot_image.image(image)
-            
+            if "degrees" not in st.session_state:
+                st.session_state["degrees"] = 0
 
-            # Seleccionar categoría
-            category = st.radio("Seleccionar categoría", ("Acta de intervención", "Acta Fotográfica"))
+            col1, col2= st.sidebar.columns(2)
+            if col1.button('↪️'):
+                # rot_image = image.rotate(rotation)
+                st.session_state["degrees"] += 90
+                rotated_image = rotation_function().btn_rotate_image(image, st.session_state["degrees"])
+                st.session_state["rotated_image"] = rotated_image
+                st.image(rotated_image, caption="Imagen girada")
+                
+            if col2.button('↩️'):
+                st.session_state["degrees"] -= 90
+                rotated_image = rotation_function().btn_rotate_image(image, st.session_state["degrees"])
+                st.session_state["rotated_image"] = rotated_image
+                st.image(rotated_image, caption="Imagen girada")
 
-            # Si la categoría es "Acta Fotográfica", permitir especificar la referencia de la imagen
-            if category == "Acta de intervención":     
-                image_ref = f'Acta de intervención sum. {suministro_selection}'
-                filename = f"{image_ref}{'.jpeg'}"
-                if st.button("Guardar Acta de Intervención"):
-                   # i = 1
-                   # while os.path.exists(os.path.join("uploads", filename)):
-                        #filename = f"{os.path.splitext(filename)[0]}_{i}{os.path.splitext(filename)[1]}"
-                       # i += 1
-
-                # Guardar imagen con el nombre especificado
-                    #with open(os.path.join("uploads", filename), "wb") as f:
-                        # f.write(uploaded_file.getbuffer())
-                        img_bytes = io.BytesIO()
-                        rot_image.save(img_bytes, format='JPEG')
-                        img_bytes = img_bytes.getvalue()
-                        st.sidebar.download_button(label='Descargar Acta', data=img_bytes, file_name=f"{filename}", mime='image/jpeg')
-                        #rot_image.save(f)
-                        st.write("Imagen Guardada")
-                    # os.rename(os.path.join("uploads", uploaded_file.name), os.path.join("uploads", filename))                    
+            if st.sidebar.button("Guardar Acta de Intervención"):
+                if st.session_state["rotated_image"] is not None:
+                    image_ref = f'Acta de intervención sum. {suministro_selection}'
+                    filename = f"{image_ref}{'.jpeg'}"
+                    sharepoint(sharepoint_url_site,folder_fotos,sharepoint_email,sharepoint_password).upload_image(filename,st.session_state["rotated_image"])                 
             else:
                 pass
     elif carga_box == carga_options[1]:
@@ -133,9 +143,16 @@ if choice_value == "1 Carga de Acta y Fotografías":
                 #os.makedirs(f'D:\Actas_Fotograficas\{suministro_selection}_output',exist_ok=True)
                 #img_bytes = rotated_image.tobytes()
                 img_bytes = io.BytesIO()
-                rotated_image.save(img_bytes, format='JPEG')
-                img_bytes = img_bytes.getvalue()
-                st.sidebar.download_button(label='Descargar Imagen', data=img_bytes, file_name=f"{label_value}_S{suministro_selection}{image_extension}", mime='image/jpeg')
+                img_bytes.seek(0)
+                st.download_button(
+                    label=f" Descarga {label_value}_{suministro_selection}",
+                    data=img_bytes,
+                    file_name=f"{label_value}_{suministro_selection}{image_extension}", 
+                    mime='image/jpeg'
+                )
+                # rotated_image.save(img_bytes, format='JPEG')
+                # img_bytes = img_bytes.getvalue()
+                # st.sidebar.download_button(label='Descargar Imagen', data=img_bytes, file_name=f"{label_value}_S{suministro_selection}{image_extension}", mime='image/jpeg')
                 #rotated_image.save(image_path)
                 st.sidebar.success(f"Imagen rotada guardada como {label_value}{image_extension}")
 
@@ -148,22 +165,17 @@ if choice_value == "1 Carga de Acta y Fotografías":
 
 
     elif carga_box == carga_options[2]:
+        ctx = sharepoint(sharepoint_url_site,folder_fotos,sharepoint_email,sharepoint_password)._auth()
+        target_folder = ctx.web.get_folder_by_server_relative_url(folder_fotos)
         # Create a new workbook
         wb = openpyxl.Workbook()
+        buffer = BytesIO()
         ws = wb.active
         ws.page_setup.orientation = ws.ORIENTATION_LANDSCAPE
         ws.sheet_view.showGridLines = False
 
         uploaded_images = st.file_uploader("Cargar las imagenes de la Intervención", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
-        # Extraer el nombre de cada elemento de la lista utilizando una expresión regular
-        #regex = r"name='(.+)'"
-        #lista_nombres = [re.search(regex, x).group(1) for x in uploaded_images]
-        # Crear una lista de diccionarios con los nombres y los elementos originales
-        #lista_diccionarios = [{'nombre': nombre, 'elemento': elemento} for nombre, elemento in zip(lista_nombres, uploaded_images)]
-        # Ordenar la lista de diccionarios con respecto al nombre
-        #lista_diccionarios.sort(key=lambda x: x['nombre'])
-        # Imprimir la lista ordenada
-        #uploaded_images = [x['elemento'] for x in lista_diccionarios]
+
         if uploaded_images:
             # Ordenar las imágenes por nombre de archivo
             uploaded_images = sorted(uploaded_images, key=lambda image: image.name)
@@ -266,15 +278,17 @@ if choice_value == "1 Carga de Acta y Fotografías":
         ####timestamp
         today = datetime.now()
         d1 = today.strftime("%d%m%y_%H%M")
-        file = io.BytesIO()
-        wb.save(file)
-        file.seek(0)
-        st.download_button(
-            label='Descarga Acta Fotográfica',
-            data=file,
-            file_name=f'Acta Fotografica {suministro_selection}.xlsx',
-            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
+        # file = io.BytesIO()
+        wb.save(buffer)
+        # file.seek(0)
+        # st.download_button(
+        #     label='Descarga Acta Fotográfica',
+        #     data=file,
+        #     file_name=f'Acta Fotografica {suministro_selection}.xlsx',
+        #     mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        # )
+        file_content = buffer.getvalue()
+        response = target_folder.upload_file(f'Acta Fotografica {suministro_selection}.xlsx', file_content).execute_query()
     else:
         pass
 else:
